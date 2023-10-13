@@ -1,0 +1,88 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+using UnityEngine;
+
+public class GameManager : Singleton<GameManager>
+{
+    public Player PlayerPrefab;
+    public Platform PlatformPrefab;
+    
+ 
+    public float MaxSpawnX;
+    public float MinSpawnX;
+    public float MaxSpawnY;
+    public float MinSpawnY;
+    public CamController MainCam;
+    private Player m_player;
+    int m_Score;
+    public override void Awake()
+    {
+        MakeSingleton(false);
+    }
+
+    public override void Start()
+    {
+        base.Start();
+        StartCoroutine(PlatformSetting());
+    }
+
+    IEnumerator PlatformSetting()
+    {
+        Platform PlatformClone=null;
+
+        if (PlatformPrefab != null)
+        {
+            PlatformClone = Instantiate(PlatformPrefab,new Vector2(0,Random.Range(MaxSpawnY,MinSpawnY)), Quaternion.identity);
+            PlatformClone.id = PlatformClone.gameObject.GetInstanceID();
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        if (PlayerPrefab != null)
+        {
+            m_player = Instantiate(PlayerPrefab, Vector3.zero, Quaternion.identity);
+            m_player.lastPlatformID = PlatformClone.id;
+
+            
+        }
+        if (PlatformPrefab != null)
+        {
+            float spawnX = m_player.transform.position.x + MinSpawnX;
+            float spawnY = Random.Range(MaxSpawnY, MinSpawnY);
+            Platform PlatformClone02 = Instantiate(PlatformPrefab, new Vector2(spawnX, spawnY), Quaternion.identity);
+            PlatformClone02.id=PlatformClone02.gameObject.GetInstanceID();
+        }
+
+    }
+
+    public void CreatePlatForm()
+    {
+        if (PlatformPrefab == null || m_player == null) return;
+
+            float SpawnX = Random.Range(m_player.transform.position.x + MinSpawnX, m_player.transform.position.x + MaxSpawnX);
+            float SpawnY = Random.Range(MinSpawnY, MaxSpawnY);
+
+            Platform PlatformClone = Instantiate(PlatformPrefab, new Vector2(SpawnX, SpawnY), Quaternion.identity);
+            PlatformClone.id = PlatformClone.gameObject.GetInstanceID();
+    }
+
+    public void CreatePlatformandLerp(float playerXPos)
+    {
+        if (MainCam != null)
+        {
+            
+            MainCam.LerpTrigger(playerXPos+MinSpawnX);
+            CreatePlatForm();
+
+        }
+    }
+
+    public void Score()
+    {
+        m_Score++;
+    }
+
+
+
+}
